@@ -37,7 +37,7 @@ namespace Boukenken.Gdax
         public async Task<HttpResponseMessage> GetResponseAsync(ApiRequest request)
         {
             var httpRequest = BuildRequestMessagee(request);
-            httpRequest.Headers.Add("User-Agent", "https://sefbkn.github.io/");
+            httpRequest.Headers.Add("User-Agent", "GdaxClient (+https://sefbkn.github.io/)");
             return await _httpClient.SendAsync(httpRequest).ConfigureAwait(false);
         }
 
@@ -46,7 +46,7 @@ namespace Boukenken.Gdax
             var requestMessage = new HttpRequestMessage {
                 RequestUri = new Uri(BaseUri, request.RequestUrl),
                 Method = request.HttpMethod,
-                Content = new StringContent(request.RequestBody, Encoding.UTF8, "application/json")
+                Content = String.IsNullOrEmpty(request.RequestBody) ? null : new StringContent(request.RequestBody, Encoding.UTF8, "application/json")
             };
 
             var token = _authenticator.GetAuthenticationToken(request);

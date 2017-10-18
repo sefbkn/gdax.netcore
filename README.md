@@ -10,7 +10,7 @@ GDAX API Client Library (C# / .NET Core)
             var passphrase = "<passphrase>";
 
             var requestAuthenticator = new RequestAuthenticator(apiKey, passphrase, secret); 
-            var productClient = new ProductClient(baseUrl, authenticationModel);
+            var productClient = new ProductClient(baseUrl, requestAuthenticator);
             var productResponse = await productClient.GetProductTickerAsync("BTC-USD");
             
             if(productResponse.StatusCode == HttpStatusCode.OK)
