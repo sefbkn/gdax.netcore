@@ -26,7 +26,7 @@ namespace Boukenken.Gdax
         {
             var timestamp = (request.Timestamp).ToString(System.Globalization.CultureInfo.InvariantCulture);
             var signature = ComputeSignature(request);
-            return new AuthenticationToken(_apiKey, signature, _passphrase, timestamp);
+            return new AuthenticationToken(_apiKey, _passphrase, signature, timestamp);
         }
         
         private string ComputeSignature(ApiRequest request)
