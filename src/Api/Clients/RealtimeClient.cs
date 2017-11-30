@@ -17,7 +17,7 @@ namespace Boukenken.Gdax
         Task SubscribeAsync(Action<string> messageReceived);
     }
 
-    public class RealtimeClient
+    public class RealtimeClient : IRealtimeClient
     {
         private Uri _websocketFeedUri;
 
