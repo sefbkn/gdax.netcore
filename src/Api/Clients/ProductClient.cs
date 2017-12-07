@@ -30,6 +30,7 @@ namespace Boukenken.Gdax
 		}
 
 		public async Task<ApiResponse<ProductTicker>> GetProductTickerAsync(string productId)
+		{
 			var response = await this.GetResponseAsync<ProductTicker>(
 				new ApiRequest(HttpMethod.Get, $"/products/{productId}/ticker")
 			);

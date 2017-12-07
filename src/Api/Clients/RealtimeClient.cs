@@ -20,16 +20,6 @@ namespace Boukenken.Gdax
     public class RealtimeClient
     {
         private Uri _websocketFeedUri;
-
-        private readonly Subject<Uri> _onConnect = new Subject<Uri>();
-        private readonly Subject<string> _onSubscribed = new Subject<string>();
-        private readonly Subject<string> _onDisconnect = new Subject<string>();
-        private readonly Subject<string> _onChange = new Subject<string>();
-        private readonly Subject<string> _onDone = new Subject<string>();
-        private readonly Subject<string> _onMatch = new Subject<string>();
-        private readonly Subject<string> _onOpen = new Subject<string>();
-        private readonly Subject<string> _onReceived = new Subject<string>();
-        private readonly Subject<string> _onError = new Subject<string>();
         
         public RealtimeClient(Uri websocketFeedUri, string[] productIds)
         {
@@ -51,7 +41,6 @@ namespace Boukenken.Gdax
             
             if (webSocketClient.State == WebSocketState.Open)
             {
-                _onConnect.OnNext(_websocketFeedUri);
                 var requestString = JsonConvert.SerializeObject(new {
                     type = "subscribe",
                     product_ids = ProductIds
@@ -61,11 +50,6 @@ namespace Boukenken.Gdax
                 var subscribeRequest = new ArraySegment<byte>(requestBytes);
                 var sendCancellationToken = new CancellationToken();
                 await webSocketClient.SendAsync(subscribeRequest, WebSocketMessageType.Text, true, sendCancellationToken).ConfigureAwait(false);
-
-                if(webSocketClient.State == WebSocketState.Open)
-                {
-                    _onSubscribed.OnNext(requestString);
-                }
 
                 while (webSocketClient.State == WebSocketState.Open)
                 {
@@ -87,7 +71,7 @@ namespace Boukenken.Gdax
             }
         }
 
-        private RealtimeMessage ParseMessage(byte[] message)
+        public RealtimeMessage ParseMessage(byte[] message)
         {
             var jsonResponse = Encoding.UTF8.GetString(message, 0, message.Length);
             var jToken = JToken.Parse(jsonResponse);
