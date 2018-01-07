@@ -14,20 +14,23 @@ namespace Boukenken.Gdax
     public interface IRealtimeClient
     {
         string[] ProductIds { get; }
+        dynamic[] Channels { get; }
         Task SubscribeAsync(Action<string> messageReceived);
     }
 
     public class RealtimeClient
     {
         private Uri _websocketFeedUri;
-        
-        public RealtimeClient(Uri websocketFeedUri, string[] productIds)
+
+        public RealtimeClient(Uri websocketFeedUri, string[] productIds, dynamic[] channels)
         {
             _websocketFeedUri = websocketFeedUri;
             this.ProductIds = productIds;
+            this.Channels = channels;
         }
 
         public string[] ProductIds { get; }
+        public dynamic[] Channels { get; }
 
         public async Task SubscribeAsync(Action<string> messageReceived)
         {
@@ -38,15 +41,17 @@ namespace Boukenken.Gdax
             var cancellationToken = new CancellationToken();
             await webSocketClient.ConnectAsync(_websocketFeedUri, cancellationToken).ConfigureAwait(false);
 
-            
+
             if (webSocketClient.State == WebSocketState.Open)
             {
-                var requestString = JsonConvert.SerializeObject(new {
+                var requestString = JsonConvert.SerializeObject(new
+                {
                     type = "subscribe",
-                    product_ids = ProductIds
+                    product_ids = ProductIds,
+                    channels = Channels
                 });
 
-                var requestBytes = UTF8Encoding.UTF8.GetBytes(requestString);
+                var requestBytes = Encoding.UTF8.GetBytes(requestString);
                 var subscribeRequest = new ArraySegment<byte>(requestBytes);
                 var sendCancellationToken = new CancellationToken();
                 await webSocketClient.SendAsync(subscribeRequest, WebSocketMessageType.Text, true, sendCancellationToken).ConfigureAwait(false);
@@ -54,16 +59,16 @@ namespace Boukenken.Gdax
                 while (webSocketClient.State == WebSocketState.Open)
                 {
                     var receiveCancellationToken = new CancellationToken();
-                    using(var stream = new MemoryStream(1024))
+                    using (var stream = new MemoryStream(1024))
                     {
-                        var receiveBuffer = new ArraySegment<byte>(new byte[1024*8]);
+                        var receiveBuffer = new ArraySegment<byte>(new byte[1024 * 8]);
                         WebSocketReceiveResult webSocketReceiveResult;
                         do
                         {
                             webSocketReceiveResult = await webSocketClient.ReceiveAsync(receiveBuffer, receiveCancellationToken).ConfigureAwait(false);
                             await stream.WriteAsync(receiveBuffer.Array, receiveBuffer.Offset, receiveBuffer.Count);
-                        } while(!webSocketReceiveResult.EndOfMessage);
-                        
+                        } while (!webSocketReceiveResult.EndOfMessage);
+
                         var message = stream.ToArray().Where(b => b != 0).ToArray();
                         messageReceived(Encoding.ASCII.GetString(message, 0, message.Length));
                     }
