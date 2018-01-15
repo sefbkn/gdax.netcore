@@ -61,11 +61,17 @@ namespace Boukenken.Gdax
                         do
                         {
                             webSocketReceiveResult = await webSocketClient.ReceiveAsync(receiveBuffer, receiveCancellationToken).ConfigureAwait(false);
-                            await stream.WriteAsync(receiveBuffer.Array, receiveBuffer.Offset, receiveBuffer.Count);
+                            await stream.WriteAsync(receiveBuffer.Array, receiveBuffer.Offset, webSocketReceiveResult.Count);
                         } while(!webSocketReceiveResult.EndOfMessage);
                         
-                        var message = stream.ToArray().Where(b => b != 0).ToArray();
-                        messageReceived(Encoding.ASCII.GetString(message, 0, message.Length));
+                        stream.Seek(0, SeekOrigin.Begin);
+                        if (webSocketReceiveResult.MessageType == WebSocketMessageType.Text)
+                        {
+                            using (var reader = new StreamReader(stream, Encoding.UTF8))
+                            {
+                                messageReceived(reader.ReadToEnd());
+                            }
+                        }
                     }
                 }
             }
