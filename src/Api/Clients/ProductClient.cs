@@ -85,12 +85,12 @@ namespace Boukenken.Gdax
 			var CandleData =  await this.GetResponseAsync<JArray>(
 					new ApiRequest(HttpMethod.Get, $"/products/{i_product_id}/candles?start={i_start.ToString("yyyy-MM-ddTHH:mm:00.00000Z")}&end={i_end.ToString("yyyy-MM-ddTHH:mm:00.00000Z")}&granularity={i_granularity.TotalSeconds}")
 					);
-			Candle c = new Candle();
 			List<Candle> cl = new List<Candle>();
 			JArray x = CandleData.Value;
 			int index = x.Count;
 			while (index-- > 0)
 			{
+                var c = new Candle();
 				c.time = (long)x[index][0];
 				c.low = (decimal)x[index][1];
 				c.high = (decimal)x[index][2];
@@ -98,6 +98,7 @@ namespace Boukenken.Gdax
 				c.close = (decimal)x[index][4];
 				c.volume = (decimal)x[index][5];
 				cl.Add(c);
+                c = null;
 			}
 
 			return cl;
