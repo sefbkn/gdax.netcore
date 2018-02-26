@@ -14,6 +14,7 @@ namespace Boukenken.Gdax
         public string time_in_force { get; set; }
         public string post_only { get; set; }
         public string created_at { get; set; }
+        public string done_at { get; set; }
         public decimal fill_fees { get; set; }
         public decimal filled_size { get; set; }
         public decimal executed_value { get; set; }
